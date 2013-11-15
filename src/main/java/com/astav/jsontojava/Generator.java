@@ -4,8 +4,8 @@ import com.astav.jsontojava.classmanager.GeneratedClassManager;
 import com.astav.jsontojava.classmanager.ImportClassManager;
 import com.astav.jsontojava.regex.RegexFilter;
 import com.astav.jsontojava.template.JavaTemplate;
-import com.astav.jsontojava.util.MergeMapCollectionHelper;
 import com.astav.jsontojava.util.MapValuesHelper;
+import com.astav.jsontojava.util.MergeMapCollectionHelper;
 import com.astav.jsontojava.util.StringHelper;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -43,13 +43,14 @@ public class Generator {
     private final boolean promptForComplexValueTypes;
     private int generatedFileCount = 0;
 
-    public Generator(String outputDirectory, String packageName, String regexFilename, String importDirectory, List<String> importPackages, boolean promptForComplexValueTypes) throws IOException, ClassNotFoundException {
+    public Generator(String outputDirectory, String packageName, String importDirectory, List<String> importPackages) throws IOException, ClassNotFoundException {
         this.packageName = packageName;
         System.out.println("Package name is '" + this.packageName + "'");
         this.outputDirectory = outputDirectory;
         System.out.println("Output directory is '" + this.outputDirectory + "'");
         this.generatedClassManager = new GeneratedClassManager(outputDirectory, packageName);
-        this.promptForComplexValueTypes = promptForComplexValueTypes;
+        this.promptForComplexValueTypes = false;
+        String regexFilename= "regex-sample.json";
         File regexFile = new File(regexFilename);
         if (regexFile.exists()) {
             System.out.println(String.format("Using regex file '%s'", regexFilename));
@@ -69,7 +70,12 @@ public class Generator {
         }
     }
 
-    public void generateClasses(String key, Map<String, Object> classData) throws IOException, ClassNotFoundException {
+    public void generateClasses(String key, String jsonString) throws IOException, ClassNotFoundException {
+        Map<String, Object> map = new ObjectMapper().readValue(jsonString, Map.class);
+        this.generateClasses(key, map);
+    }
+
+    private void generateClasses(String key, Map<String, Object> classData) throws IOException, ClassNotFoundException {
         String className = StringHelper.capFirstLetter(key);
         ClassFileData classFileData = classFiles.get(className);
         for (Map.Entry<String, Object> entry : classData.entrySet()) {
@@ -145,20 +151,10 @@ public class Generator {
                 if (mapKeyIsANumber) { // if the key is a number stay as a map
                     stayAsMap = true;
                 } else if (valuesPrimitiveType.isPresent()) { // if all values are the same primitive type
-                    stayAsMap = !askUserIfNewClassIsRequired(
-                            entryKey,
-                            mapValue,
-                            valuesPrimitiveType.get().getSimpleName(),
-                            String.format("called '%s'", StringHelper.capFirstLetter(entryKey)),
-                            true);
-                } else if(promptForComplexValueTypes
+                    stayAsMap = false;
+                } else if (promptForComplexValueTypes
                         && mapValuesHelper.areAllValuesComplexTypes(mapValue)) { // if all values are complex types (assignable to a map)
-                    stayAsMap = !askUserIfNewClassIsRequired(
-                            entryKey,
-                            mapValue,
-                            StringHelper.capFirstLetter(getEntryKeyWithPostfix(entryKey)),
-                            "for every key in the map",
-                            false);
+                    stayAsMap = false;
                 }
 
                 if (!stayAsMap) {
@@ -245,18 +241,7 @@ public class Generator {
         for (Class<?> matchingClass : matchingClasses) {
             System.out.println(" " + i++ + ". " + matchingClass.getSimpleName() + " in package (" + matchingClass.getPackage().getName() + ")");
         }
-        Integer valueChosen = null;
-        while (valueChosen == null) {
-            System.out.print(String.format("Pick an option for json field '%s' [default: %s]: ", entryKey, defaultIndex));
-            String inputStr = br.readLine();
-            if (inputStr.isEmpty()) {
-                valueChosen = defaultIndex;
-            } else {
-                valueChosen = Integer.valueOf(inputStr);
-            }
-            if (valueChosen < 1 || (valueChosen - 1) > matchingClasses.size()) valueChosen = null;
-        }
-        System.out.println();
+        Integer valueChosen = new Integer(1);
         switch (valueChosen) {
             case 1:
                 useIndex = -1;
@@ -266,28 +251,6 @@ public class Generator {
                 break;
         }
         return useIndex;
-    }
-
-    private boolean askUserIfNewClassIsRequired(String entryKey, Map mapValue, String forMapValue, String secondOption, boolean defaultIsMap) throws IOException {
-        System.out.println();
-        int defaultEntryIndex = defaultIsMap ? 1 : 2;
-        System.out.println(String.format("What would you like to use for json field '%s'\n%s\n...", entryKey, objectMapper.writeValueAsString(mapValue)));
-        System.out.println(String.format(" 1. Use a 'Map<String, %s>'", forMapValue));
-        System.out.println(String.format(" 2. Generate a new class %s", secondOption));
-        Integer valueChosen = null;
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        while (valueChosen == null
-                || (valueChosen != 1
-                && valueChosen != 2)) {
-            System.out.print(String.format("Pick a class for json field '%s' [default: %s]: ", entryKey, defaultEntryIndex));
-            String inputStr = br.readLine();
-            if (inputStr.isEmpty()) {
-                valueChosen = defaultEntryIndex;
-            } else {
-                valueChosen = Integer.valueOf(inputStr);
-            }
-        }
-        return valueChosen == 2;
     }
 
     public int getGeneratedFileCount() {
