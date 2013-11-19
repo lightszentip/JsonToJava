@@ -30,7 +30,9 @@ public class JavaTemplate {
         for (Map.Entry<String, String> variablesToTypeEntry : classFileData.getMapOfVariablesToTypes().entrySet()) {
             String v = variablesToTypeEntry.getKey();
             String t = variablesToTypeEntry.getValue();
-            appendJsonKey(stringBuilder, v).append(" private ").append(t).append(" ").append(v).append(";\r\n");
+            appendJsonKey(stringBuilder, v).append(" private ").append(t).append(" ").append(v).append(";\r\n\r\n");
+            stringBuilder.append("\tpublic ").append(t).append(" get").append(capitalize(v)).append("() {\r\n");
+            stringBuilder.append("\t\treturn ").append(v).append(";\r\n\t}\r\n");
         }
         stringBuilder.append("}\r\n");
 
@@ -47,5 +49,9 @@ public class JavaTemplate {
 
     private StringBuilder appendJsonKey(StringBuilder stringBuilder, String entryKey) {
         return stringBuilder.append(String.format("\t%s(\"%s\")", JSON_ANNOTATION, entryKey));
+    }
+
+    private String capitalize(String line) {
+        return Character.toUpperCase(line.charAt(0)) + line.substring(1);
     }
 }
