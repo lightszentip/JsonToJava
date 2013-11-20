@@ -36,6 +36,7 @@ public class Generator {
     private final MergeMapCollectionHelper mergeMapCollectionHelper = new MergeMapCollectionHelper();
     private final MapValuesHelper mapValuesHelper = new MapValuesHelper();
     private final JavaTemplate javaTemplate = new JavaTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final GeneratedClassManager generatedClassManager;
     private final Optional<ImportClassManager> importClassManager;
     private final Optional<RegexFilter> regexFilter;
@@ -53,7 +54,7 @@ public class Generator {
         File regexFile = new File(regexFilename);
         if (regexFile.exists()) {
             System.out.println(String.format("Using regex file '%s'", regexFilename));
-            RegexFilter regexFilter = new ObjectMapper().readValue(regexFile, new TypeReference<RegexFilter>() {
+            RegexFilter regexFilter = objectMapper.readValue(regexFile, new TypeReference<RegexFilter>() {
             });
             this.regexFilter = Optional.of(regexFilter);
         } else {
@@ -70,7 +71,7 @@ public class Generator {
     }
 
     public void generateClasses(String key, String jsonString) throws IOException, ClassNotFoundException {
-        Map<String, Object> map = new ObjectMapper().readValue(jsonString, Map.class);
+        Map<String, Object> map = objectMapper.readValue(jsonString, Map.class);
         this.generateClasses(key, map);
     }
 
