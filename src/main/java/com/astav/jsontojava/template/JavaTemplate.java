@@ -21,7 +21,6 @@ public class JavaTemplate {
         String className = StringHelper.capFirstLetter(key);
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("package ").append(packageName).append(";\r\n\r\n");
-        stringBuilder.append("import org.codehaus.jackson.annotate.JsonProperty;\r\n");
         for (String importPackageName : classFileData.getImportPackages()) {
             stringBuilder.append("import ").append(importPackageName).append(";\r\n");
         }
