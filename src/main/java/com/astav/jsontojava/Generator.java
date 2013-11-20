@@ -35,7 +35,6 @@ public class Generator {
     private final ClassFiles classFiles = new ClassFiles();
     private final MergeMapCollectionHelper mergeMapCollectionHelper = new MergeMapCollectionHelper();
     private final MapValuesHelper mapValuesHelper = new MapValuesHelper();
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final JavaTemplate javaTemplate = new JavaTemplate();
     private final GeneratedClassManager generatedClassManager;
     private final Optional<ImportClassManager> importClassManager;
@@ -54,7 +53,7 @@ public class Generator {
         File regexFile = new File(regexFilename);
         if (regexFile.exists()) {
             System.out.println(String.format("Using regex file '%s'", regexFilename));
-            RegexFilter regexFilter = objectMapper.readValue(regexFile, new TypeReference<RegexFilter>() {
+            RegexFilter regexFilter = new ObjectMapper().readValue(regexFile, new TypeReference<RegexFilter>() {
             });
             this.regexFilter = Optional.of(regexFilter);
         } else {
