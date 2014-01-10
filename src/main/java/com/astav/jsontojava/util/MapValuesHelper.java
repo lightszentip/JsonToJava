@@ -21,41 +21,6 @@ public class MapValuesHelper {
         for (Class primitiveClass : primitiveTypeClasses) {
             if (primitiveClass == String.class
                     && primitiveClass.isAssignableFrom(aClass)) {
-                String strValue = (String) value;
-                try {
-                    Integer.valueOf(strValue);
-                    Class reference = Integer.class;
-                    return Optional.of(reference);
-                } catch (NumberFormatException ignored) {
-                }
-
-                try {
-                    Long.valueOf(strValue);
-                    Class reference = Long.class;
-                    return Optional.of(reference);
-                } catch (NumberFormatException ignored) {
-                }
-
-                try {
-                    Float.valueOf(strValue);
-                    Class reference = Float.class;
-                    return Optional.of(reference);
-                } catch (NumberFormatException ignored) {
-                }
-
-                try {
-                    Double.valueOf(strValue);
-                    Class reference = Double.class;
-                    return Optional.of(reference);
-                } catch (NumberFormatException ignored) {
-                }
-
-                String lowerCaseStrValue = strValue.toLowerCase();
-                if (lowerCaseStrValue.equals("true") || lowerCaseStrValue.equals("false")) {
-                    Class reference = Boolean.class;
-                    return Optional.of(reference);
-                }
-
                 Class reference = String.class;
                 return Optional.of(reference);
             } else if (primitiveClass.isAssignableFrom(aClass)) {
