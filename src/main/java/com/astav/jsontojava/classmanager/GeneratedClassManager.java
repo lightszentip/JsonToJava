@@ -46,30 +46,34 @@ public class GeneratedClassManager extends BaseClassManager {
     public void compileAndLoadClass(String className, File outputFile, String outputDirectory) throws ClassNotFoundException {
         JavaCompiler javaCompiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
-        StandardJavaFileManager standardFileManager = javaCompiler.getStandardFileManager(null, Locale.getDefault(), Charset.defaultCharset());
-        Iterable<? extends JavaFileObject> compilationUnits = standardFileManager.getJavaFileObjects(outputFile);
-        List<String> options = Arrays.asList(
-                "-d", outputDirectory,
-                "-sourcepath", outputDirectory,
-                "-classpath", System.getProperty("java.class.path"));
-
-        JavaCompiler.CompilationTask task = javaCompiler.getTask(
-                null,
-                standardFileManager,
-                diagnostics,
-                options,
-                null,
-                compilationUnits);
-
-        Boolean success = task.call();
-
-        if (success) {
-            loadClass(className);
+        if(javaCompiler != null) {
+	        StandardJavaFileManager standardFileManager = javaCompiler.getStandardFileManager(null, Locale.getDefault(), Charset.defaultCharset());
+	        Iterable<? extends JavaFileObject> compilationUnits = standardFileManager.getJavaFileObjects(outputFile);
+	        List<String> options = Arrays.asList(
+	                "-d", outputDirectory,
+	                "-sourcepath", outputDirectory,
+	                "-classpath", System.getProperty("java.class.path"));
+	
+	        JavaCompiler.CompilationTask task = javaCompiler.getTask(
+	                null,
+	                standardFileManager,
+	                diagnostics,
+	                options,
+	                null,
+	                compilationUnits);
+	
+	        Boolean success = task.call();
+	
+	        if (success) {
+	            loadClass(className);
+	        } else {
+	            System.out.println("! Failed to compile " + className);
+	            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+	                System.out.println("Error : " + diagnostic.toString());
+	            }
+	        }
         } else {
-            System.out.println("! Failed to compile " + className);
-            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
-                System.out.println("Error : " + diagnostic.toString());
-            }
+        	System.out.println("To compile the created files - You need a JDK!! Failed to compile " + className);
         }
     }
 

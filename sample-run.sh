@@ -3,5 +3,4 @@ rm out/test/*
 rmdir out/test
 rmdir out
 
-export CLASSPATH=target/classes/:lib/*:import/
-java com.astav.jsontojava.JsonToJava sample.json out com.dristhi.report Data
+java -jar target\jsontojava-1.0.jar sample.json out com.dristhi.report Data
